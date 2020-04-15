@@ -1,6 +1,7 @@
 import sys
 import socket
 import threading
+import tkinter as tk
 
 
 def receive(conn):
@@ -21,7 +22,7 @@ def receive(conn):
 
 def sendMsg(conn):
     while True:
-        message = input().replace('b', '').encode()
+        message = input().encode()
         if message == '':
             pass
         if message.decode() == 'exit':
@@ -38,6 +39,22 @@ def sendMsg(conn):
                     print('Well, you have to')
                 else:
                     print('Please exit the program by typing \'exit\'')
+
+
+
+#methods for GUI
+def send_message(event):
+
+    mess = text_box.get("1.0", tk.END)
+    print(mess)
+    conn.sendall(mess.encode())
+    text_box.delete(1.0, tk.END)
+    log.configure(state=tk.NORMAL)
+    log.insert(tk.END, '\n')
+    log.insert(tk.END, '\nMe: ')
+    log.insert(tk.END, mess) 
+    log.configure(state=tk.DISABLED)
+
 
 if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
