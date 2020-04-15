@@ -2,6 +2,7 @@ import sys
 import socket
 import threading
 
+
 def receive(conn):
     while True:
         received = conn.recv(1024)
