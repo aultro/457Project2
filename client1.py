@@ -5,63 +5,51 @@ import tkinter as tk
 
 #TODO
 
-#clear button
-#
 
-global yourname
-
-#methods for chat
 
 def receive(s):
     while True:
-        message = s.recv(1024)
+        try:
+            message = s.recv(1024)
+        except:
+            print("Unable to recieve")
         if not message:
             break
         if message == ' ':
             pass
         elif message.decode()=='exit':
+            log.configure(state=tk.NORMAL)
             log.insert(tk.END, 'Your Buddy has disconnected')
+            log.configure(state=tk.DISABLED)
             try:
                 s.sendall(message)
             except:
-                pass
+                break
             finally:
                 break
         else:
             log.configure(state=tk.NORMAL)
             log.insert(tk.END, '\nBuddy: ')
             log.insert(tk.END, message.decode())
-            log.insert(tk.END, '\n') 
             log.yview_pickplace("end")
             log.configure(state=tk.DISABLED)
 
-'''
-def sendMsg(s):
-    #while True:
-    s_msg = text_box.get("1.0", tk.END)
-    if s_msg == '':
-        pass
-    if s_msg == 'exit':
-        try:
-            s.sendall(s_msg)
-        except:
-            pass
-        
-    else:
-        try:
-            s.sendall(s_msg)
-        except:
-            if s_msg=='i dont wanna':
-                print('Well, you have to')
-            else:
-                print('Please exit the program by typing \'exit\'')
-'''
 
 #methods for GUI
+
+def clear_log(event):
+    log.configure(state=tk.NORMAL)
+    log.delete(1.0, tk.END)
+    log.insert(tk.END, "--Log--") 
+    log.tag_configure("center", justify='center')
+    log.tag_add("center", 1.0)
+    log.configure(cursor="sailboat")
+    log.configure(state=tk.DISABLED)
+
+
 def send_message(event):
 
     mess = text_box.get("1.0", tk.END)
-    print(mess)
     s.sendall(mess.encode())
     text_box.delete(1.0, tk.END)
     log.configure(state=tk.NORMAL)
@@ -75,26 +63,25 @@ def send_message(event):
 
 if __name__ == '__main__':
     
-    window_title = 'CHATTER WINDOW'
-    yourname = ""
-    if len(sys.argv) is 2:
-        yourname = sys.argv[1]
-        window_format = "\'s CHATTER WINDOW"
-        window_title = yourname + window_format
-    
+    if len(sys.argv) ==3:
+        ip_val = sys.argv[1]
+        port_val = sys.argv[2]
 
+    
+    if len(sys.argv) == 2:
+        ip_val='127.0.0.1'
+        port_val = sys.argv[1]
+    
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    #s.connect((sys.argv[1], int(sys.argv[2])))
-    s.connect(('127.0.0.1', 11111))
+    s.connect((ip_val, int(port_val)))
     thread1 = threading.Thread(target = receive, args = ([s]))
-    #thread2 = threading.Thread(target = sendMsg, args = ([s]))
-    thread1.start()
-    #thread2.start()
 
-    
+    #GUI-----------------------------------------------------
+
     window = tk.Tk()
+    window_title = 'Client CHATTER WINDOW'
     window.title(window_title)
     
     
@@ -105,27 +92,26 @@ if __name__ == '__main__':
     type_frame = tk.Frame(master=window, width=100, height=100, bg='yellow')
 
 
-    connect_button = tk.Button(buttons_frame,
-        text="Connect",
+    clear_button = tk.Button(buttons_frame,
+        text="Clear",
         width=20,
         height=2,
         bg="mediumslateblue",
         fg="yellow")
-    #connect_button.bind("<Button-1>", send_message)
+    clear_button.bind("<Button-1>", clear_log)
 
     ip_label = tk.Label(buttons_frame, text="IP", anchor="w", bg='lightcoral')
     port_label = tk.Label(buttons_frame, text='PORT', anchor="w", bg='lightcoral')
-    ip_entry = tk.Entry(buttons_frame)
-    port_entry = tk.Entry(buttons_frame)
+    
+    ip_label['text']=ip_val
+    port_label['text']=port_val
 
     #grid button frame
     buttons_frame.rowconfigure(5, minsize=100, weight=1)
     buttons_frame.columnconfigure(0, minsize=100, weight=1)
-    connect_button.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+    clear_button.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
     ip_label.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-    ip_entry.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
     port_label.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
-    port_entry.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
 
 
     log = tk.Text(master=window, 
@@ -139,6 +125,8 @@ if __name__ == '__main__':
     log.insert(tk.END, "--Log--") 
     log.tag_configure("center", justify='center')
     log.tag_add("center", 1.0)
+    log.configure(cursor="sailboat")
+    log.configure(state=tk.DISABLED)
     
     
 
@@ -165,8 +153,18 @@ if __name__ == '__main__':
     buttons_frame.grid(row=0, column=0, sticky="nsew", rowspan=4)
     type_frame.grid(row=4, column=0, sticky="nsew", columnspan=4)
 
-    window.mainloop()
+#-------------------------------------------------------------------------------
 
+
+    thread1.start()
+
+
+    window.mainloop()
+    try:
+        s.sendall("exit".encode())
+    except:
+        pass
+    s.close()
     thread1.join()
-    #thread2.join()
+   
         
