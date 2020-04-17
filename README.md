@@ -1,10 +1,8 @@
 # 457Project2
 CIS 457 Datacom Project 2 
 
-2 files
+First run server file. server.py [ip] [port num]
+Then run client file client.py [ip] [port num]
+If no ip is supplied, the localhost ip is used.
 
-1 will initiate connection
-1 will listen for connection
-
-text based messages
-use inbuilt libraries for emojiis
+no support for emojiis at this time
