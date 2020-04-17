@@ -13,6 +13,7 @@ def receive(s):
             message = s.recv(1024)
         except:
             print("Unable to recieve")
+            break
         if not message:
             break
         if message == ' ':

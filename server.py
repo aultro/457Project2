@@ -6,7 +6,11 @@ import tkinter as tk
 
 def receive(conn):
     while True:
-        received = conn.recv(1024)
+        try:
+            received = conn.recv(1024)
+        except:
+            print("Unable to recieve")
+            break
         if received =='':
             break
         elif received.decode() =='exit':
